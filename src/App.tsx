@@ -6,7 +6,7 @@ import Profile from './pages/Profile'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/vtag-app">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/scan" element={<Scan />} />
