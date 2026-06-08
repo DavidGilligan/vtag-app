@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Scan from './pages/Scan'
 import Garage from './pages/Garage'
 import Profile from './pages/Profile'
+import Gallery from './pages/Gallery'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/scan" element={<Scan />} />
         <Route path="/garage" element={<Garage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/gallery" element={<Gallery />} />
       </Routes>
     </BrowserRouter>
   )

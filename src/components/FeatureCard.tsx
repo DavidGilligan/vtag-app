@@ -6,24 +6,20 @@ type FeatureCardProps = {
   description: string
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: FeatureCardProps) {
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <button className="w-full rounded-2xl bg-zinc-900 p-4 text-left transition hover:bg-zinc-800">
+    <button className="theme-card w-full rounded-2xl p-4 text-left transition">
       <div className="flex items-center gap-4">
-        <div className="rounded-xl bg-zinc-800 p-3">
+        <div className="theme-card-secondary rounded-xl p-3">
           {icon}
         </div>
 
         <div>
-          <h3 className="font-semibold text-white">
+          <h3 className="font-semibold">
             {title}
           </h3>
 
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="theme-muted mt-1 text-sm">
             {description}
           </p>
         </div>

@@ -3,6 +3,7 @@ import { Camera, FileText, Calendar, CheckCircle, Loader2 } from 'lucide-react'
 import { createWorker } from 'tesseract.js'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import AppShell from '../components/AppShell'
 
 type ExtractedDocument = {
   documentType: string
@@ -128,171 +129,173 @@ function Scan() {
   }
 
   return (
-    <main className="min-h-screen bg-[#050606] pb-28 text-white">
-      <Header />
+    <AppShell>
+      <main className="theme-bg min-h-screen pb-28">
+        <Header />
 
-      <section className="px-5 pt-6">
-        <p className="text-xs tracking-widest text-zinc-500">
-          DOCUMENT SCAN
-        </p>
+        <section className="px-5 pt-6">
+          <p className="theme-subtle text-xs tracking-widest">
+            DOCUMENT SCAN
+          </p>
 
-        <h1 className="mt-1 text-3xl font-bold">
-          SCAN DOCUMENT
-        </h1>
+          <h1 className="mt-1 text-3xl font-bold">
+            SCAN DOCUMENT
+          </h1>
 
-        <p className="mt-2 text-sm text-zinc-400">
-          Scan service records, MOT documents, receipts, invoices, and ownership paperwork.
-        </p>
-      </section>
+          <p className="theme-muted mt-2 text-sm">
+            Scan service records, MOT documents, receipts, invoices, and ownership paperwork.
+          </p>
+        </section>
 
-      <section className="mt-6 px-5">
-        <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-700 bg-zinc-900 p-6 text-center">
-          {preview ? (
-            <img
-              src={preview}
-              alt="Uploaded document"
-              className="max-h-[260px] rounded-2xl object-contain"
+        <section className="mt-6 px-5">
+          <label className="theme-card flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed p-6 text-center theme-border">
+            {preview ? (
+              <img
+                src={preview}
+                alt="Uploaded document"
+                className="max-h-[260px] rounded-2xl object-contain"
+              />
+            ) : (
+              <>
+                <div className="theme-card-secondary rounded-full p-5">
+                  <Camera size={34} />
+                </div>
+
+                <h2 className="mt-4 text-lg font-bold">
+                  Tap to scan or upload
+                </h2>
+
+                <p className="theme-muted mt-2 text-sm">
+                  Upload a photo of a vehicle document
+                </p>
+              </>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageUpload}
+              className="hidden"
             />
-          ) : (
-            <>
-              <div className="rounded-full bg-zinc-800 p-5">
-                <Camera size={34} />
+          </label>
+        </section>
+
+        {preview && (
+          <section className="mt-5 px-5">
+            <div className="theme-card rounded-3xl p-5">
+              <div className="flex items-center gap-3">
+                <div className="theme-card-secondary rounded-xl p-3">
+                  <FileText size={22} />
+                </div>
+
+                <div>
+                  <h2 className="font-bold">Extracted Document</h2>
+                  <p className="theme-muted text-sm">
+                    {isScanning ? 'Reading document text...' : 'OCR scan complete'}
+                  </p>
+                </div>
               </div>
 
-              <h2 className="mt-4 text-lg font-bold">
-                Tap to scan or upload
-              </h2>
+              {isScanning && (
+                <div className="theme-card-secondary mt-5 flex items-center gap-3 rounded-2xl p-4">
+                  <Loader2 className="animate-spin" size={20} />
+                  <p className="text-sm">Scanning image for readable text...</p>
+                </div>
+              )}
 
-              <p className="mt-2 text-sm text-zinc-400">
-                Upload a photo of a vehicle document
-              </p>
-            </>
-          )}
+              {!isScanning && ocrText && (
+                <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+                  <p className="theme-subtle text-xs">TEXT FOUND</p>
 
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-        </label>
-      </section>
+                  <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm">
+                    {ocrText}
+                  </p>
+                </div>
+              )}
 
-      {preview && (
-        <section className="mt-5 px-5">
-          <div className="rounded-3xl bg-zinc-900 p-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-zinc-800 p-3">
-                <FileText size={22} />
-              </div>
+              {documentData && (
+                <div className="mt-5 space-y-3">
+                  <div className="theme-card-secondary rounded-2xl p-4">
+                    <p className="theme-subtle text-xs">DOCUMENT TYPE</p>
+                    <p className="mt-1 font-semibold">{documentData.documentType}</p>
+                  </div>
 
-              <div>
-                <h2 className="font-bold">Extracted Document</h2>
-                <p className="text-sm text-zinc-400">
-                  {isScanning ? 'Reading document text...' : 'OCR scan complete'}
-                </p>
-              </div>
+                  <div className="theme-card-secondary rounded-2xl p-4">
+                    <p className="theme-subtle text-xs">DATE FOUND</p>
+                    <p className="mt-1 font-semibold">{documentData.dateFound}</p>
+                  </div>
+
+                  <div className="theme-card-secondary rounded-2xl p-4">
+                    <p className="theme-subtle text-xs">MILEAGE</p>
+                    <p className="mt-1 font-semibold">{documentData.mileage}</p>
+                  </div>
+
+                  <div className="theme-card-secondary rounded-2xl p-4">
+                    <p className="theme-subtle text-xs">GARAGE</p>
+                    <p className="mt-1 font-semibold">{documentData.garageName}</p>
+                  </div>
+
+                  <div className="theme-card-secondary rounded-2xl p-4">
+                    <p className="theme-subtle text-xs">SERVICE SUMMARY</p>
+
+                    <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
+                      {documentData.summary.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleLogDocument}
+                disabled={!documentData}
+                className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+              >
+                Log to Timeline
+              </button>
             </div>
+          </section>
+        )}
 
-            {isScanning && (
-              <div className="mt-5 flex items-center gap-3 rounded-2xl bg-zinc-800 p-4 text-zinc-300">
-                <Loader2 className="animate-spin" size={20} />
-                <p className="text-sm">Scanning image for readable text...</p>
-              </div>
-            )}
-
-            {!isScanning && ocrText && (
-              <div className="mt-5 rounded-2xl bg-zinc-800 p-4">
-                <p className="text-xs text-zinc-500">TEXT FOUND</p>
-
-                <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm text-zinc-300">
-                  {ocrText}
-                </p>
-              </div>
-            )}
-
-            {documentData && (
-              <div className="mt-5 space-y-3">
-                <div className="rounded-2xl bg-zinc-800 p-4">
-                  <p className="text-xs text-zinc-500">DOCUMENT TYPE</p>
-                  <p className="mt-1 font-semibold">{documentData.documentType}</p>
-                </div>
-
-                <div className="rounded-2xl bg-zinc-800 p-4">
-                  <p className="text-xs text-zinc-500">DATE FOUND</p>
-                  <p className="mt-1 font-semibold">{documentData.dateFound}</p>
-                </div>
-
-                <div className="rounded-2xl bg-zinc-800 p-4">
-                  <p className="text-xs text-zinc-500">MILEAGE</p>
-                  <p className="mt-1 font-semibold">{documentData.mileage}</p>
-                </div>
-
-                <div className="rounded-2xl bg-zinc-800 p-4">
-                  <p className="text-xs text-zinc-500">GARAGE</p>
-                  <p className="mt-1 font-semibold">{documentData.garageName}</p>
-                </div>
-
-                <div className="rounded-2xl bg-zinc-800 p-4">
-                  <p className="text-xs text-zinc-500">SERVICE SUMMARY</p>
-
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-zinc-300">
-                    {documentData.summary.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={handleLogDocument}
-              disabled={!documentData}
-              className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
-            >
-              Log to Timeline
-            </button>
-          </div>
-        </section>
-      )}
-
-      {logged && documentData && (
-        <section className="mt-5 px-5">
-          <div className="flex items-center gap-3 rounded-2xl bg-green-900/30 p-4 text-green-400">
-            <CheckCircle size={22} />
-            <p className="text-sm font-semibold">
-              Document logged to vehicle timeline
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section className="mt-6 px-5">
-        <div className="rounded-3xl bg-zinc-900 p-5">
-          <div className="mb-4 flex items-center gap-3">
-            <Calendar size={22} />
-            <h2 className="font-bold">Timeline Preview</h2>
-          </div>
-
-          <div className="border-l border-zinc-700 pl-4">
-            <div>
+        {logged && documentData && (
+          <section className="mt-5 px-5">
+            <div className="flex items-center gap-3 rounded-2xl bg-green-900/30 p-4 text-green-400">
+              <CheckCircle size={22} />
               <p className="text-sm font-semibold">
-                {documentData?.dateFound || 'Awaiting scan'}
-              </p>
-
-              <p className="mt-1 text-sm text-zinc-400">
-                {documentData
-                  ? `${documentData.documentType} - ${documentData.summary[0]}`
-                  : 'Scan a document to generate a timeline entry'}
+                Document logged to vehicle timeline
               </p>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        )}
 
-      <BottomNav />
-    </main>
+        <section className="mt-6 px-5">
+          <div className="theme-card rounded-3xl p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <Calendar size={22} />
+              <h2 className="font-bold">Timeline Preview</h2>
+            </div>
+
+            <div className="theme-border border-l pl-4">
+              <div>
+                <p className="text-sm font-semibold">
+                  {documentData?.dateFound || 'Awaiting scan'}
+                </p>
+
+                <p className="theme-muted mt-1 text-sm">
+                  {documentData
+                    ? `${documentData.documentType} - ${documentData.summary[0]}`
+                    : 'Scan a document to generate a timeline entry'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <BottomNav />
+      </main>
+    </AppShell>
   )
 }
 

@@ -6,7 +6,103 @@
 
 body {
   margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+html,
+body {
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+button {
+  font-family: inherit;
+}
+
+.theme-outer {
   background: #050606;
   color: white;
-  font-family: Inter, system-ui, sans-serif;
+}
+
+.theme-bg {
+  background: #050606;
+  color: white;
+}
+
+.theme-card {
+  background: #18181b;
+  color: white;
+}
+
+.theme-card-secondary {
+  background: #27272a;
+  color: white;
+}
+
+.theme-panel {
+  background: #111113;
+  color: white;
+}
+
+.theme-nav {
+  background: #050606;
+  color: white;
+  border-color: #27272a;
+}
+
+.theme-muted {
+  color: #a1a1aa;
+}
+
+.theme-subtle {
+  color: #71717a;
+}
+
+.theme-border {
+  border-color: #3f3f46;
+}
+
+html.light .theme-outer {
+  background: #e4e4e7;
+  color: #050606;
+}
+
+html.light .theme-bg {
+  background: #f4f4f5;
+  color: #050606;
+}
+
+html.light .theme-card {
+  background: #ffffff;
+  color: #050606;
+  border: 1px solid #e4e4e7;
+}
+
+html.light .theme-card-secondary {
+  background: #f4f4f5;
+  color: #050606;
+  border: 1px solid #e4e4e7;
+}
+
+html.light .theme-panel {
+  background: #ffffff;
+  color: #050606;
+}
+
+html.light .theme-nav {
+  background: #ffffff;
+  color: #050606;
+  border-color: #e4e4e7;
+}
+
+html.light .theme-muted {
+  color: #52525b;
+}
+
+html.light .theme-subtle {
+  color: #71717a;
+}
+
+html.light .theme-border {
+  border-color: #d4d4d8;
 }
