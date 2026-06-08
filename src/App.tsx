@@ -4,6 +4,7 @@ import Scan from './pages/Scan'
 import Garage from './pages/Garage'
 import Profile from './pages/Profile'
 import Gallery from './pages/Gallery'
+import VehicleIdentity from './pages/VehicleIdentity'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/garage" element={<Garage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/vehicle-identity" element={<VehicleIdentity />} />
       </Routes>
     </BrowserRouter>
   )
