@@ -1,4 +1,4 @@
-import { CirclePoundSterling, Car, Wrench, Building2, ShieldCheck } from 'lucide-react'
+import { Car, Wrench, Building2, ShieldCheck } from 'lucide-react'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import AppShell from '../components/AppShell'

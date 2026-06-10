@@ -11,7 +11,6 @@ import {
   HeartHandshake,
   Loader2,
   MemoryStick,
-  MessageSquareText,
   ReceiptText,
   Search,
   ShieldCheck,

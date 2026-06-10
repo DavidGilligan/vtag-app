@@ -5,7 +5,6 @@ import {
   CircleHelp,
   Contact,
   Lock,
-  Mail,
   Moon,
   RefreshCcw,
   Settings as SettingsIcon,
