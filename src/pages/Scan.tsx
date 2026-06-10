@@ -36,43 +36,113 @@ type ExtractedDocument = {
 }
 
 const documentTypes = [
-  {
-    title: 'MOT Certificate',
-    icon: <ClipboardList size={24} />,
-  },
-  {
-    title: 'Servicing Record',
-    icon: <Wrench size={24} />,
-  },
-  {
-    title: 'Tyre/Wheel Replacement',
-    icon: <Gauge size={24} />,
-  },
-  {
-    title: 'Windscreen Repair',
-    icon: <Glasses size={24} />,
-  },
-  {
-    title: 'Self-Maintenance',
-    icon: <MemoryStick size={24} />,
-  },
-  {
-    title: 'Modifications',
-    icon: <Sparkles size={24} />,
-  },
-  {
-    title: 'Memorabilia',
-    icon: <HeartHandshake size={24} />,
-  },
-  {
-    title: 'Insurance Documents',
-    icon: <ShieldCheck size={24} />,
-  },
-  {
-    title: 'Tax & Registration',
-    icon: <ReceiptText size={24} />,
-  },
+  { title: 'MOT Certificate', icon: <ClipboardList size={24} /> },
+  { title: 'Servicing Record', icon: <Wrench size={24} /> },
+  { title: 'Tyre/Wheel Replacement', icon: <Gauge size={24} /> },
+  { title: 'Windscreen Repair', icon: <Glasses size={24} /> },
+  { title: 'Self-Maintenance', icon: <MemoryStick size={24} /> },
+  { title: 'Modifications', icon: <Sparkles size={24} /> },
+  { title: 'Memorabilia', icon: <HeartHandshake size={24} /> },
+  { title: 'Insurance Documents', icon: <ShieldCheck size={24} /> },
+  { title: 'Tax & Registration', icon: <ReceiptText size={24} /> },
 ]
+
+async function preprocessImage(imageUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.src = imageUrl
+
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+
+      if (!ctx) {
+        reject(new Error('Canvas is not supported'))
+        return
+      }
+
+      const maxWidth = 1400
+      const scale = image.width > maxWidth ? maxWidth / image.width : 1
+
+      canvas.width = image.width * scale
+      canvas.height = image.height * scale
+
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const data = imageData.data
+
+      const histogram = new Array(256).fill(0)
+      const greyValues: number[] = []
+
+      for (let i = 0; i < data.length; i += 4) {
+        const grey = Math.round(
+          data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114
+        )
+
+        greyValues.push(grey)
+        histogram[grey] += 1
+      }
+
+      const totalPixels = greyValues.length
+      let sum = 0
+
+      for (let i = 0; i < 256; i += 1) {
+        sum += i * histogram[i]
+      }
+
+      let sumBackground = 0
+      let weightBackground = 0
+      let maxVariance = 0
+      let threshold = 127
+
+      for (let i = 0; i < 256; i += 1) {
+        weightBackground += histogram[i]
+
+        if (weightBackground === 0) continue
+
+        const weightForeground = totalPixels - weightBackground
+
+        if (weightForeground === 0) break
+
+        sumBackground += i * histogram[i]
+
+        const meanBackground = sumBackground / weightBackground
+        const meanForeground = (sum - sumBackground) / weightForeground
+
+        const variance =
+          weightBackground *
+          weightForeground *
+          Math.pow(meanBackground - meanForeground, 2)
+
+        if (variance > maxVariance) {
+          maxVariance = variance
+          threshold = i
+        }
+      }
+
+      for (let i = 0; i < data.length; i += 4) {
+        const grey = Math.round(
+          data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114
+        )
+
+        const value = grey > threshold ? 255 : 0
+
+        data[i] = value
+        data[i + 1] = value
+        data[i + 2] = value
+      }
+
+      ctx.putImageData(imageData, 0, 0)
+
+      resolve(canvas.toDataURL('image/png'))
+    }
+
+    image.onerror = () => {
+      reject(new Error('Image failed to load'))
+    }
+  })
+}
 
 function extractDocumentData(text: string): ExtractedDocument {
   const lowerText = text.toLowerCase()
@@ -165,7 +235,12 @@ function Scan() {
     const worker = await createWorker('eng')
 
     try {
-      const result = await worker.recognize(imageUrl)
+      const cleanedImage = await preprocessImage(imageUrl)
+
+      const result = await worker.recognize(cleanedImage, {
+        tessedit_pageseg_mode: '6',
+      })
+
       const extractedText = result.data.text
 
       setOcrText(extractedText)
@@ -200,11 +275,9 @@ function Scan() {
       <main className="theme-bg min-h-screen pb-28">
         <Header />
 
-        <section className="px-5 pt-6">
+        <section className="px-5 pt-2">
           <p className="theme-subtle text-xs tracking-widest">SCAN</p>
-
           <h1 className="mt-1 text-3xl font-bold">SCAN CENTRE</h1>
-
           <p className="theme-muted mt-2 text-sm">
             Scan V-Tags, upload vehicle documents, or search registration history.
           </p>
@@ -243,9 +316,7 @@ function Scan() {
                 <SmartphoneNfc size={54} />
               </div>
 
-              <h2 className="mt-5 text-2xl font-bold">
-                How to scan a V-Tag
-              </h2>
+              <h2 className="mt-5 text-2xl font-bold">How to scan a V-Tag</h2>
 
               <p className="theme-muted mt-3 text-sm leading-6">
                 Simply hover or touch the tag with the top of your phone. It will
@@ -253,9 +324,7 @@ function Scan() {
               </p>
 
               <div className="theme-card-secondary mt-5 rounded-2xl p-4 text-left">
-                <p className="font-semibold">
-                  Already have the reference?
-                </p>
+                <p className="font-semibold">Already have the reference?</p>
 
                 <p className="theme-muted mt-1 text-sm">
                   You can also search if the user has their app handy and can provide the V-TAG reference.
@@ -273,9 +342,7 @@ function Scan() {
               </div>
 
               <div className="theme-card-secondary mt-5 rounded-2xl p-4">
-                <p className="font-semibold">
-                  No V-Tag on the vehicle?
-                </p>
+                <p className="font-semibold">No V-Tag on the vehicle?</p>
 
                 <p className="theme-muted mt-1 text-sm">
                   Help another driver discover V-TAG.
@@ -316,7 +383,6 @@ function Scan() {
                       }`}
                     >
                       {documentType.icon}
-
                       <span className="mt-2 text-[11px] font-semibold leading-tight">
                         {documentType.title}
                       </span>
@@ -487,9 +553,7 @@ function Scan() {
                     PREVIEW RESULT
                   </p>
 
-                  <p className="mt-2 font-bold">
-                    BMW M135i
-                  </p>
+                  <p className="mt-2 font-bold">BMW M135i</p>
 
                   <p className="theme-muted mt-1 text-sm">
                     Vehicle history preview available for {registrationSearch}.
@@ -514,9 +578,7 @@ function Scan() {
                 <SmartphoneNfc size={48} />
               </div>
 
-              <h2 className="mt-5 text-2xl font-bold">
-                Pass it on
-              </h2>
+              <h2 className="mt-5 text-2xl font-bold">Pass it on</h2>
 
               <p className="theme-muted mt-3 text-sm leading-6">
                 Hold your phone end-to-end with the other user's phone to share
@@ -560,9 +622,7 @@ function ScanOption({ active, icon, title, caption, onClick }: ScanOptionProps) 
       </div>
 
       <div>
-        <h2 className="font-bold">
-          {title}
-        </h2>
+        <h2 className="font-bold">{title}</h2>
 
         <p className="theme-muted mt-1 text-sm">
           {caption}

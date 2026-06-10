@@ -7,10 +7,12 @@ import Gallery from './pages/Gallery'
 import VehicleIdentity from './pages/VehicleIdentity'
 import Settings from './pages/Settings'
 import VMart from './pages/VMart'
+import ScrollToTop from './components/ScrollToTop'
 
 function App() {
   return (
     <BrowserRouter basename="/vtag-app">
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/scan" element={<Scan />} />

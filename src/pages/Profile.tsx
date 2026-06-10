@@ -8,7 +8,7 @@ function Profile() {
       <main className="theme-bg min-h-screen pb-28">
         <Header />
 
-        <section className="px-5 pt-6">
+        <section className="px-5 pt-2">
           <p className="theme-subtle text-xs tracking-widest">
             PROFILE
           </p>

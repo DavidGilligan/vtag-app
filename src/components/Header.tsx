@@ -46,7 +46,7 @@ function Header() {
 
   return (
     <>
-      <header className="flex items-center justify-between px-5 py-4">
+      <header className="flex items-center justify-between px-5 py-2">
         {isHomePage ? (
           <button
             onClick={() => setMenuOpen(true)}
@@ -63,7 +63,7 @@ function Header() {
         <img
           src={logo}
           alt="V-TAG"
-          className="h-28 w-auto max-w-[210px] object-contain md:h-32"
+          className="h-20 w-auto max-w-[185px] object-contain md:h-24"
         />
 
         <button
