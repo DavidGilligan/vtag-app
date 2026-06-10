@@ -237,9 +237,7 @@ function Scan() {
     try {
       const cleanedImage = await preprocessImage(imageUrl)
 
-      const result = await worker.recognize(cleanedImage, {
-        tessedit_pageseg_mode: '6',
-      })
+      const result = await worker.recognize(cleanedImage)
 
       const extractedText = result.data.text
 
