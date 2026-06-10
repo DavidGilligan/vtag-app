@@ -151,54 +151,66 @@ function extractDocumentData(text: string): ExtractedDocument {
     /\b(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}|\d{1,2}\s+[A-Za-z]+\s+\d{4})\b/
   )
 
-  const mileageMatch = text.match(
-    /\b(\d{1,3}(?:,\d{3})+|\d{4,6})\s?(miles|mi|mileage)?\b/i
-  )
+  const mileageKeywords = [
+    /mileage[:\s]*([0-9,]+)/i,
+    /odometer[:\s]*([0-9,]+)/i,
+    /miles[:\s]*([0-9,]+)/i,
+    /current mileage[:\s]*([0-9,]+)/i,
+  ]
+
+  let mileage = 'Mileage not detected'
+
+  for (const pattern of mileageKeywords) {
+    const match = text.match(pattern)
+
+    if (match?.[1]) {
+      mileage = `${match[1]} miles`
+      break
+    }
+  }
 
   let documentType = 'Vehicle Document'
 
-  if (lowerText.includes('service')) {
-    documentType = 'BMW Service Record'
+  if (lowerText.includes('invoice')) {
+    documentType = 'Invoice'
+  } else if (lowerText.includes('service')) {
+    documentType = 'Service Record'
   } else if (lowerText.includes('mot')) {
     documentType = 'MOT Certificate'
-  } else if (lowerText.includes('invoice')) {
-    documentType = 'Invoice'
   } else if (lowerText.includes('receipt')) {
     documentType = 'Receipt'
   }
 
+  let garageName = 'Garage not detected'
+
+  if (lowerText.includes('range rover')) {
+    garageName = 'Range Rover / Land Rover'
+  } else if (lowerText.includes('john clark')) {
+    garageName = 'John Clark BMW Aberdeen'
+  } else if (lowerText.includes('bmw')) {
+    garageName = 'BMW Service Centre'
+  }
+
   const summary: string[] = []
 
+  if (lowerText.includes('castrol')) {
+    summary.push('Castrol-approved oil or lubricant identified on the document.')
+  }
+
   if (lowerText.includes('oil')) {
-    summary.push('Engine oil replaced with BMW-approved synthetic oil.')
+    summary.push('Engine oil or lubricant-related item detected.')
   }
 
-  if (lowerText.includes('filter')) {
-    summary.push('Oil filter, air filter or cabin filter checked/replaced.')
+  if (lowerText.includes('labour') || lowerText.includes('labor')) {
+    summary.push('Labour charge detected on the invoice.')
   }
 
-  if (lowerText.includes('microfilter') || lowerText.includes('pollen')) {
-    summary.push('Microfilter / cabin pollen filter replaced.')
+  if (lowerText.includes('vat')) {
+    summary.push('VAT line detected on the invoice.')
   }
 
-  if (lowerText.includes('brake')) {
-    summary.push('Brake pads, discs or brake fluid inspected.')
-  }
-
-  if (lowerText.includes('tyre') || lowerText.includes('tire')) {
-    summary.push('Tyre tread depth and tyre pressures checked.')
-  }
-
-  if (lowerText.includes('spark')) {
-    summary.push('Spark plugs inspected or replaced.')
-  }
-
-  if (lowerText.includes('coolant')) {
-    summary.push('Coolant level checked and topped up where required.')
-  }
-
-  if (lowerText.includes('diagnostic') || lowerText.includes('fault')) {
-    summary.push('BMW diagnostic scan completed.')
+  if (lowerText.includes('invoice')) {
+    summary.push('Invoice document detected. Manual review recommended for itemised costs.')
   }
 
   if (summary.length === 0) {
@@ -208,8 +220,8 @@ function extractDocumentData(text: string): ExtractedDocument {
   return {
     documentType,
     dateFound: dateMatch ? dateMatch[0] : 'Date not detected',
-    mileage: mileageMatch ? `${mileageMatch[1]} miles` : 'Mileage not detected',
-    garageName: 'Garage not detected',
+    mileage,
+    garageName,
     summary,
   }
 }
