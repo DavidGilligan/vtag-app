@@ -52,11 +52,13 @@ function Home() {
             />
           </Link>
 
-          <FeatureCard
-            icon={<Settings size={20} />}
-            title="Settings"
-            description="Manage your preferences"
-          />
+          <Link to="/settings" className="block">
+            <FeatureCard
+              icon={<Settings size={20} />}
+              title="Settings"
+              description="Manage your preferences"
+            />
+          </Link>
         </section>
 
         <BottomNav />

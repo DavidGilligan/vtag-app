@@ -1,9 +1,32 @@
 import { useState } from 'react'
-import { Camera, FileText, Calendar, CheckCircle, Loader2 } from 'lucide-react'
+import {
+  BadgeIcon,
+  Camera,
+  Car,
+  CheckCircle,
+  ClipboardList,
+  FileText,
+  Gauge,
+  Glasses,
+  HeartHandshake,
+  Loader2,
+  MemoryStick,
+  MessageSquareText,
+  ReceiptText,
+  Search,
+  ShieldCheck,
+  SmartphoneNfc,
+  Sparkles,
+  Tag,
+  Wrench,
+  X,
+} from 'lucide-react'
 import { createWorker } from 'tesseract.js'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import AppShell from '../components/AppShell'
+
+type ScanMode = 'vtag' | 'document' | 'registration'
 
 type ExtractedDocument = {
   documentType: string
@@ -12,6 +35,45 @@ type ExtractedDocument = {
   garageName: string
   summary: string[]
 }
+
+const documentTypes = [
+  {
+    title: 'MOT Certificate',
+    icon: <ClipboardList size={24} />,
+  },
+  {
+    title: 'Servicing Record',
+    icon: <Wrench size={24} />,
+  },
+  {
+    title: 'Tyre/Wheel Replacement',
+    icon: <Gauge size={24} />,
+  },
+  {
+    title: 'Windscreen Repair',
+    icon: <Glasses size={24} />,
+  },
+  {
+    title: 'Self-Maintenance',
+    icon: <MemoryStick size={24} />,
+  },
+  {
+    title: 'Modifications',
+    icon: <Sparkles size={24} />,
+  },
+  {
+    title: 'Memorabilia',
+    icon: <HeartHandshake size={24} />,
+  },
+  {
+    title: 'Insurance Documents',
+    icon: <ShieldCheck size={24} />,
+  },
+  {
+    title: 'Tax & Registration',
+    icon: <ReceiptText size={24} />,
+  },
+]
 
 function extractDocumentData(text: string): ExtractedDocument {
   const lowerText = text.toLowerCase()
@@ -84,6 +146,12 @@ function extractDocumentData(text: string): ExtractedDocument {
 }
 
 function Scan() {
+  const [activeMode, setActiveMode] = useState<ScanMode>('vtag')
+  const [selectedDocumentType, setSelectedDocumentType] = useState('')
+  const [passItOnOpen, setPassItOnOpen] = useState(false)
+  const [referenceSearch, setReferenceSearch] = useState('')
+  const [registrationSearch, setRegistrationSearch] = useState('')
+
   const [preview, setPreview] = useState<string | null>(null)
   const [ocrText, setOcrText] = useState('')
   const [isScanning, setIsScanning] = useState(false)
@@ -134,168 +202,393 @@ function Scan() {
         <Header />
 
         <section className="px-5 pt-6">
-          <p className="theme-subtle text-xs tracking-widest">
-            DOCUMENT SCAN
-          </p>
+          <p className="theme-subtle text-xs tracking-widest">SCAN</p>
 
-          <h1 className="mt-1 text-3xl font-bold">
-            SCAN DOCUMENT
-          </h1>
+          <h1 className="mt-1 text-3xl font-bold">SCAN CENTRE</h1>
 
           <p className="theme-muted mt-2 text-sm">
-            Scan service records, MOT documents, receipts, invoices, and ownership paperwork.
+            Scan V-Tags, upload vehicle documents, or search registration history.
           </p>
         </section>
 
-        <section className="mt-6 px-5">
-          <label className="theme-card flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed p-6 text-center theme-border">
-            {preview ? (
-              <img
-                src={preview}
-                alt="Uploaded document"
-                className="max-h-[260px] rounded-2xl object-contain"
-              />
-            ) : (
-              <>
-                <div className="theme-card-secondary rounded-full p-5">
-                  <Camera size={34} />
-                </div>
+        <section className="mt-6 space-y-3 px-5">
+          <ScanOption
+            active={activeMode === 'vtag'}
+            icon={<SmartphoneNfc size={24} />}
+            title="Scan a V-Tag"
+            caption="Scan a V-Tag on an existing vehicle"
+            onClick={() => setActiveMode('vtag')}
+          />
 
-                <h2 className="mt-4 text-lg font-bold">
-                  Tap to scan or upload
-                </h2>
+          <ScanOption
+            active={activeMode === 'document'}
+            icon={<FileText size={24} />}
+            title="Scan a Document"
+            caption="Scan a document for upload to your garage"
+            onClick={() => setActiveMode('document')}
+          />
 
-                <p className="theme-muted mt-2 text-sm">
-                  Upload a photo of a vehicle document
-                </p>
-              </>
-            )}
-
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </label>
+          <ScanOption
+            active={activeMode === 'registration'}
+            icon={<BadgeIcon size={24} />}
+            title="Scan a Registration"
+            caption="Scan a car's registration to see history"
+            onClick={() => setActiveMode('registration')}
+          />
         </section>
 
-        {preview && (
-          <section className="mt-5 px-5">
-            <div className="theme-card rounded-3xl p-5">
-              <div className="flex items-center gap-3">
-                <div className="theme-card-secondary rounded-xl p-3">
-                  <FileText size={22} />
-                </div>
-
-                <div>
-                  <h2 className="font-bold">Extracted Document</h2>
-                  <p className="theme-muted text-sm">
-                    {isScanning ? 'Reading document text...' : 'OCR scan complete'}
-                  </p>
-                </div>
+        {activeMode === 'vtag' && (
+          <section className="mt-6 px-5">
+            <div className="theme-card rounded-3xl p-6 text-center">
+              <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-green-900/30 text-green-400">
+                <SmartphoneNfc size={54} />
               </div>
 
-              {isScanning && (
-                <div className="theme-card-secondary mt-5 flex items-center gap-3 rounded-2xl p-4">
-                  <Loader2 className="animate-spin" size={20} />
-                  <p className="text-sm">Scanning image for readable text...</p>
-                </div>
-              )}
+              <h2 className="mt-5 text-2xl font-bold">
+                How to scan a V-Tag
+              </h2>
 
-              {!isScanning && ocrText && (
-                <div className="theme-card-secondary mt-5 rounded-2xl p-4">
-                  <p className="theme-subtle text-xs">TEXT FOUND</p>
-
-                  <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm">
-                    {ocrText}
-                  </p>
-                </div>
-              )}
-
-              {documentData && (
-                <div className="mt-5 space-y-3">
-                  <div className="theme-card-secondary rounded-2xl p-4">
-                    <p className="theme-subtle text-xs">DOCUMENT TYPE</p>
-                    <p className="mt-1 font-semibold">{documentData.documentType}</p>
-                  </div>
-
-                  <div className="theme-card-secondary rounded-2xl p-4">
-                    <p className="theme-subtle text-xs">DATE FOUND</p>
-                    <p className="mt-1 font-semibold">{documentData.dateFound}</p>
-                  </div>
-
-                  <div className="theme-card-secondary rounded-2xl p-4">
-                    <p className="theme-subtle text-xs">MILEAGE</p>
-                    <p className="mt-1 font-semibold">{documentData.mileage}</p>
-                  </div>
-
-                  <div className="theme-card-secondary rounded-2xl p-4">
-                    <p className="theme-subtle text-xs">GARAGE</p>
-                    <p className="mt-1 font-semibold">{documentData.garageName}</p>
-                  </div>
-
-                  <div className="theme-card-secondary rounded-2xl p-4">
-                    <p className="theme-subtle text-xs">SERVICE SUMMARY</p>
-
-                    <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
-                      {documentData.summary.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={handleLogDocument}
-                disabled={!documentData}
-                className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
-              >
-                Log to Timeline
-              </button>
-            </div>
-          </section>
-        )}
-
-        {logged && documentData && (
-          <section className="mt-5 px-5">
-            <div className="flex items-center gap-3 rounded-2xl bg-green-900/30 p-4 text-green-400">
-              <CheckCircle size={22} />
-              <p className="text-sm font-semibold">
-                Document logged to vehicle timeline
+              <p className="theme-muted mt-3 text-sm leading-6">
+                Simply hover or touch the tag with the top of your phone. It will
+                send you a reference to the vehicle.
               </p>
-            </div>
-          </section>
-        )}
 
-        <section className="mt-6 px-5">
-          <div className="theme-card rounded-3xl p-5">
-            <div className="mb-4 flex items-center gap-3">
-              <Calendar size={22} />
-              <h2 className="font-bold">Timeline Preview</h2>
-            </div>
-
-            <div className="theme-border border-l pl-4">
-              <div>
-                <p className="text-sm font-semibold">
-                  {documentData?.dateFound || 'Awaiting scan'}
+              <div className="theme-card-secondary mt-5 rounded-2xl p-4 text-left">
+                <p className="font-semibold">
+                  Already have the reference?
                 </p>
 
                 <p className="theme-muted mt-1 text-sm">
-                  {documentData
-                    ? `${documentData.documentType} - ${documentData.summary[0]}`
-                    : 'Scan a document to generate a timeline entry'}
+                  You can also search if the user has their app handy and can provide the V-TAG reference.
                 </p>
+
+                <div className="theme-bg mt-4 flex items-center gap-3 rounded-2xl px-4 py-3">
+                  <Search size={18} />
+                  <input
+                    value={referenceSearch}
+                    onChange={(event) => setReferenceSearch(event.target.value)}
+                    placeholder="Enter V-TAG reference"
+                    className="w-full bg-transparent text-sm outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+                <p className="font-semibold">
+                  No V-Tag on the vehicle?
+                </p>
+
+                <p className="theme-muted mt-1 text-sm">
+                  Help another driver discover V-TAG.
+                </p>
+
+                <button
+                  onClick={() => setPassItOnOpen(true)}
+                  className="mt-4 w-full rounded-2xl bg-white py-3 font-bold text-black"
+                >
+                  Pass it on
+                </button>
               </div>
             </div>
+          </section>
+        )}
+
+        {activeMode === 'document' && (
+          <>
+            <section className="mt-6 px-5">
+              <div className="theme-card rounded-3xl p-5">
+                <p className="theme-subtle text-xs tracking-widest">
+                  SELECT A DOCUMENT
+                </p>
+
+                <h2 className="mt-1 text-2xl font-bold">
+                  What are you uploading?
+                </h2>
+
+                <div className="mt-5 grid grid-cols-3 gap-3">
+                  {documentTypes.map((documentType) => (
+                    <button
+                      key={documentType.title}
+                      onClick={() => setSelectedDocumentType(documentType.title)}
+                      className={`theme-card-secondary flex min-h-28 flex-col items-center justify-center rounded-2xl p-3 text-center transition ${
+                        selectedDocumentType === documentType.title
+                          ? 'ring-2 ring-green-400'
+                          : ''
+                      }`}
+                    >
+                      {documentType.icon}
+
+                      <span className="mt-2 text-[11px] font-semibold leading-tight">
+                        {documentType.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {selectedDocumentType && (
+              <section className="mt-5 px-5">
+                <div className="theme-card rounded-3xl p-5">
+                  <p className="theme-subtle text-xs tracking-widest">
+                    SELECTED DOCUMENT
+                  </p>
+
+                  <h2 className="mt-1 text-xl font-bold">
+                    {selectedDocumentType}
+                  </h2>
+
+                  <p className="theme-muted mt-2 text-sm">
+                    Upload a photo or scan the document to extract text and add it to your garage.
+                  </p>
+
+                  <label className="theme-card-secondary mt-5 flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed p-6 text-center theme-border">
+                    {preview ? (
+                      <img
+                        src={preview}
+                        alt="Uploaded document"
+                        className="max-h-[260px] rounded-2xl object-contain"
+                      />
+                    ) : (
+                      <>
+                        <div className="theme-bg rounded-full p-5">
+                          <Camera size={34} />
+                        </div>
+
+                        <h3 className="mt-4 text-lg font-bold">
+                          Tap to scan or upload
+                        </h3>
+
+                        <p className="theme-muted mt-2 text-sm">
+                          Upload a photo of your {selectedDocumentType.toLowerCase()}
+                        </p>
+                      </>
+                    )}
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </section>
+            )}
+
+            {preview && (
+              <section className="mt-5 px-5">
+                <div className="theme-card rounded-3xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="theme-card-secondary rounded-xl p-3">
+                      <FileText size={22} />
+                    </div>
+
+                    <div>
+                      <h2 className="font-bold">Extracted Document</h2>
+                      <p className="theme-muted text-sm">
+                        {isScanning ? 'Reading document text...' : 'OCR scan complete'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isScanning && (
+                    <div className="theme-card-secondary mt-5 flex items-center gap-3 rounded-2xl p-4">
+                      <Loader2 className="animate-spin" size={20} />
+                      <p className="text-sm">Scanning image for readable text...</p>
+                    </div>
+                  )}
+
+                  {!isScanning && ocrText && (
+                    <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+                      <p className="theme-subtle text-xs">TEXT FOUND</p>
+
+                      <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm">
+                        {ocrText}
+                      </p>
+                    </div>
+                  )}
+
+                  {documentData && (
+                    <div className="mt-5 space-y-3">
+                      <DataTile label="Document Type" value={selectedDocumentType || documentData.documentType} />
+                      <DataTile label="Date Found" value={documentData.dateFound} />
+                      <DataTile label="Mileage" value={documentData.mileage} />
+                      <DataTile label="Garage" value={documentData.garageName} />
+
+                      <div className="theme-card-secondary rounded-2xl p-4">
+                        <p className="theme-subtle text-xs">SERVICE SUMMARY</p>
+
+                        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
+                          {documentData.summary.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleLogDocument}
+                    disabled={!documentData}
+                    className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+                  >
+                    Log to Garage
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {logged && documentData && (
+              <section className="mt-5 px-5">
+                <div className="flex items-center gap-3 rounded-2xl bg-green-900/30 p-4 text-green-400">
+                  <CheckCircle size={22} />
+                  <p className="text-sm font-semibold">
+                    Document logged to your garage
+                  </p>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {activeMode === 'registration' && (
+          <section className="mt-6 px-5">
+            <div className="theme-card rounded-3xl p-5">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-orange-900/30 text-orange-400">
+                <Car size={46} />
+              </div>
+
+              <h2 className="mt-5 text-center text-2xl font-bold">
+                Scan a Registration
+              </h2>
+
+              <p className="theme-muted mt-3 text-center text-sm leading-6">
+                Enter or scan a registration plate to preview vehicle history and public records.
+              </p>
+
+              <div className="theme-card-secondary mt-5 flex items-center gap-3 rounded-2xl px-4 py-3">
+                <Tag size={18} />
+                <input
+                  value={registrationSearch}
+                  onChange={(event) => setRegistrationSearch(event.target.value.toUpperCase())}
+                  placeholder="AB12 CDE"
+                  className="w-full bg-transparent text-center text-lg font-bold tracking-widest outline-none"
+                />
+              </div>
+
+              <button className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black">
+                Search Registration
+              </button>
+
+              {registrationSearch && (
+                <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+                  <p className="theme-subtle text-xs tracking-widest">
+                    PREVIEW RESULT
+                  </p>
+
+                  <p className="mt-2 font-bold">
+                    BMW M135i
+                  </p>
+
+                  <p className="theme-muted mt-1 text-sm">
+                    Vehicle history preview available for {registrationSearch}.
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {passItOnOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+            <div className="theme-card w-full max-w-sm rounded-3xl p-6 text-center">
+              <button
+                onClick={() => setPassItOnOpen(false)}
+                className="theme-card-secondary ml-auto flex rounded-full p-2"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="mx-auto mt-2 flex h-24 w-24 items-center justify-center rounded-full bg-green-900/30 text-green-400">
+                <SmartphoneNfc size={48} />
+              </div>
+
+              <h2 className="mt-5 text-2xl font-bold">
+                Pass it on
+              </h2>
+
+              <p className="theme-muted mt-3 text-sm leading-6">
+                Hold your phone end-to-end with the other user's phone to share
+                the magic of V-TAG.
+              </p>
+
+              <button
+                onClick={() => setPassItOnOpen(false)}
+                className="mt-6 w-full rounded-2xl bg-white py-3 font-bold text-black"
+              >
+                Done
+              </button>
+            </div>
           </div>
-        </section>
+        )}
 
         <BottomNav />
       </main>
     </AppShell>
+  )
+}
+
+type ScanOptionProps = {
+  active: boolean
+  icon: React.ReactNode
+  title: string
+  caption: string
+  onClick: () => void
+}
+
+function ScanOption({ active, icon, title, caption, onClick }: ScanOptionProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`theme-card flex w-full items-center gap-4 rounded-3xl p-5 text-left transition ${
+        active ? 'ring-2 ring-green-400' : ''
+      }`}
+    >
+      <div className="theme-card-secondary rounded-2xl p-3">
+        {icon}
+      </div>
+
+      <div>
+        <h2 className="font-bold">
+          {title}
+        </h2>
+
+        <p className="theme-muted mt-1 text-sm">
+          {caption}
+        </p>
+      </div>
+    </button>
+  )
+}
+
+type DataTileProps = {
+  label: string
+  value: string
+}
+
+function DataTile({ label, value }: DataTileProps) {
+  return (
+    <div className="theme-card-secondary rounded-2xl p-4">
+      <p className="theme-subtle text-xs tracking-widest">
+        {label}
+      </p>
+
+      <p className="mt-1 font-semibold">
+        {value}
+      </p>
+    </div>
   )
 }
 

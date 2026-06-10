@@ -5,6 +5,9 @@ import logo from '../assets/vtag-logo.png'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [phoneSettingsOpen, setPhoneSettingsOpen] = useState(false)
+  const [pushEnabled, setPushEnabled] = useState(false)
   const [lightMode, setLightMode] = useState(false)
 
   const location = useLocation()
@@ -32,6 +35,15 @@ function Header() {
     }
   }
 
+  function handlePushNotifications() {
+    if (!pushEnabled) {
+      setPhoneSettingsOpen(true)
+      setPushEnabled(true)
+    } else {
+      setPushEnabled(false)
+    }
+  }
+
   return (
     <>
       <header className="flex items-center justify-between px-5 py-4">
@@ -54,7 +66,10 @@ function Header() {
           className="h-28 w-auto max-w-[210px] object-contain md:h-32"
         />
 
-        <button className="theme-card rounded-full p-3 transition">
+        <button
+          onClick={() => setNotificationOpen(true)}
+          className="theme-card rounded-full p-3 transition"
+        >
           <Bell size={22} />
         </button>
       </header>
@@ -106,9 +121,7 @@ function Header() {
               <button
                 onClick={toggleTheme}
                 className={`w-full rounded-xl py-3 font-bold transition ${
-                  lightMode
-                    ? 'bg-[#050606] text-white'
-                    : 'bg-white text-black'
+                  lightMode ? 'bg-[#050606] text-white' : 'bg-white text-black'
                 }`}
               >
                 {lightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
@@ -122,6 +135,67 @@ function Header() {
                 Vehicle identity, history and document management.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {notificationOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 p-5 backdrop-blur-sm">
+          <div className="theme-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <p className="theme-subtle text-xs tracking-widest">
+                  NOTIFICATIONS
+                </p>
+
+                <h2 className="mt-1 text-2xl font-bold">
+                  Notification Centre
+                </h2>
+              </div>
+
+              <button
+                onClick={() => setNotificationOpen(false)}
+                className="theme-card-secondary rounded-full p-2"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handlePushNotifications}
+                className="theme-card-secondary w-full rounded-2xl p-4 text-left font-semibold"
+              >
+                {pushEnabled
+                  ? 'Disable Push Notifications'
+                  : 'Enable Push Notifications'}
+              </button>
+
+              <button className="w-full rounded-2xl bg-red-900/30 p-4 text-left font-semibold text-red-400">
+                Mark Vehicle as Stolen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {phoneSettingsOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+          <div className="theme-card w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
+            <h2 className="text-xl font-bold">
+              Push Notification Settings
+            </h2>
+
+            <p className="theme-muted mt-3 text-sm">
+              This would normally take you to phone settings.
+            </p>
+
+            <button
+              onClick={() => setPhoneSettingsOpen(false)}
+              className="mt-6 w-full rounded-2xl bg-white py-3 font-bold text-black"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

@@ -1,7 +1,16 @@
-import { ShieldCheck, Wifi } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, ShieldCheck, Wifi } from 'lucide-react'
 import hero from '../assets/hero.png'
 
 function VehicleCard() {
+  const [mileage, setMileage] = useState('')
+  const [stored, setStored] = useState(false)
+
+  function handleLogMileage() {
+    if (!mileage.trim()) return
+    setStored(true)
+  }
+
   return (
     <section className="px-5">
       <div className="mb-2 flex items-center justify-between">
@@ -42,6 +51,40 @@ function VehicleCard() {
           <p className="theme-muted mt-2 text-sm">
             Registration: AB12 CDE
           </p>
+
+          <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+            <p className="theme-subtle text-xs tracking-widest">
+              TODAY&apos;S MILEAGE
+            </p>
+
+            {stored ? (
+              <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-green-900/30 px-4 py-4 font-bold text-green-400">
+                <CheckCircle size={20} />
+                Stored!
+              </div>
+            ) : (
+              <div className="mt-3 flex gap-2">
+                <input
+                  value={mileage}
+                  onChange={(event) => setMileage(event.target.value)}
+                  type="number"
+                  placeholder="Enter mileage"
+                  className="theme-bg min-w-0 flex-1 rounded-xl px-4 py-3 text-sm outline-none"
+                />
+
+                <button
+                  onClick={handleLogMileage}
+                  className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-black"
+                >
+                  Log
+                </button>
+              </div>
+            )}
+
+            <p className="theme-muted mt-3 text-xs">
+              Logging regular mileage is of benefit to you.
+            </p>
+          </div>
         </div>
       </div>
     </section>
