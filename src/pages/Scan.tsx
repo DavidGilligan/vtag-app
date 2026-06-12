@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   BadgeIcon,
   Camera,
@@ -7,7 +7,7 @@ import {
   ClipboardList,
   FileText,
   Gauge,
-  Glasses,
+  Glasses,  
   HeartHandshake,
   Loader2,
   MemoryStick,
@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react'
 import { createWorker } from 'tesseract.js'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import AppShell from '../components/AppShell'
@@ -34,6 +35,24 @@ type ExtractedDocument = {
   garageName: string
   summary: string[]
 }
+
+type VtagLookupResult = {
+  id: string
+  vehicleId: string
+  referenceCode: string
+  status: string
+  vehicle: {
+    id: string
+    make: string
+    model: string
+    registration: string | null
+    vin: string | null
+    verificationStatus: string
+  }
+}
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 const documentTypes = [
   { title: 'MOT Certificate', icon: <ClipboardList size={24} /> },
@@ -227,17 +246,83 @@ function extractDocumentData(text: string): ExtractedDocument {
 }
 
 function Scan() {
+  const [searchParams] = useSearchParams()
   const [activeMode, setActiveMode] = useState<ScanMode>('vtag')
   const [selectedDocumentType, setSelectedDocumentType] = useState('')
   const [passItOnOpen, setPassItOnOpen] = useState(false)
   const [referenceSearch, setReferenceSearch] = useState('')
+  const [vtagResult, setVtagResult] = useState<VtagLookupResult | null>(null)
+  const [vtagError, setVtagError] = useState('')
+  const [isLookingUpVtag, setIsLookingUpVtag] = useState(false)
   const [registrationSearch, setRegistrationSearch] = useState('')
+  const [registrationResult, setRegistrationResult] = useState<any>(null)
+  const [registrationError, setRegistrationError] = useState('')
 
   const [preview, setPreview] = useState<string | null>(null)
   const [ocrText, setOcrText] = useState('')
   const [isScanning, setIsScanning] = useState(false)
   const [logged, setLogged] = useState(false)
   const [documentData, setDocumentData] = useState<ExtractedDocument | null>(null)
+
+  useEffect(() => {
+    const referenceFromUrl = searchParams.get('ref')
+
+    if (!referenceFromUrl) return
+
+    setActiveMode('vtag')
+    setReferenceSearch(referenceFromUrl)
+    handleReferenceLookup(referenceFromUrl)
+  }, [searchParams])
+
+  async function handleRegistrationLookup() {
+    if (!registrationSearch.trim()) return
+
+    setRegistrationError('')
+    setRegistrationResult(null)
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/registration-lookup/${registrationSearch.trim()}`
+      )
+
+      if (!response.ok) {
+        throw new Error('Registration lookup failed')
+      }
+
+      const data = await response.json()
+      setRegistrationResult(data)
+    } catch (error) {
+      setRegistrationError('Unable to look up this registration.')
+    }
+  }
+
+  async function handleReferenceLookup(referenceOverride?: string) {
+    const reference = (referenceOverride || referenceSearch).trim().toUpperCase()
+
+    if (!reference) return
+
+    setVtagError('')
+    setVtagResult(null)
+    setIsLookingUpVtag(true)
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/vtags/reference/${encodeURIComponent(reference)}`
+      )
+
+      if (!response.ok) {
+        throw new Error('V-TAG reference not found')
+      }
+
+      const data = await response.json()
+      setVtagResult(data)
+    } catch (error) {
+      console.error(error)
+      setVtagError('Unable to find this V-TAG reference.')
+    } finally {
+      setIsLookingUpVtag(false)
+    }
+  }
 
   async function runOcr(imageUrl: string) {
     setIsScanning(true)
@@ -344,11 +429,49 @@ function Scan() {
                   <Search size={18} />
                   <input
                     value={referenceSearch}
-                    onChange={(event) => setReferenceSearch(event.target.value)}
+                    onChange={(event) => setReferenceSearch(event.target.value.toUpperCase())}
                     placeholder="Enter V-TAG reference"
                     className="w-full bg-transparent text-sm outline-none"
                   />
                 </div>
+
+                <button
+                  onClick={() => handleReferenceLookup()}
+                  disabled={!referenceSearch.trim() || isLookingUpVtag}
+                  className="mt-4 w-full rounded-2xl bg-green-500 py-3 font-bold text-black disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+                >
+                  {isLookingUpVtag ? 'Searching...' : 'Search V-TAG'}
+                </button>
+
+                {vtagResult && (
+                  <div className="mt-4 rounded-2xl bg-green-900/30 p-4 text-left">
+                    <p className="text-sm font-bold text-green-400">
+                      V-TAG Found
+                    </p>
+
+                    <p className="mt-2 font-semibold">
+                      {vtagResult.vehicle.make} {vtagResult.vehicle.model}
+                    </p>
+
+                    <p className="theme-muted mt-1 text-sm">
+                      Registration: {vtagResult.vehicle.registration || 'Not recorded'}
+                    </p>
+
+                    <p className="theme-muted mt-1 text-sm">
+                      Reference: {vtagResult.referenceCode}
+                    </p>
+
+                    <p className="theme-muted mt-1 text-sm">
+                      Status: {vtagResult.status}
+                    </p>
+                  </div>
+                )}
+
+                {vtagError && (
+                  <p className="mt-4 text-sm text-red-400">
+                    {vtagError}
+                  </p>
+                )}
               </div>
 
               <div className="theme-card-secondary mt-5 rounded-2xl p-4">
@@ -552,24 +675,55 @@ function Scan() {
                   className="w-full bg-transparent text-center text-lg font-bold tracking-widest outline-none"
                 />
               </div>
-
-              <button className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black">
+              
+              <button
+                onClick={handleRegistrationLookup}
+                className="mt-5 w-full rounded-2xl bg-white py-4 font-bold text-black"
+              >
                 Search Registration
               </button>
 
-              {registrationSearch && (
-                <div className="theme-card-secondary mt-5 rounded-2xl p-4">
-                  <p className="theme-subtle text-xs tracking-widest">
-                    PREVIEW RESULT
-                  </p>
-
-                  <p className="mt-2 font-bold">BMW M135i</p>
-
-                  <p className="theme-muted mt-1 text-sm">
-                    Vehicle history preview available for {registrationSearch}.
-                  </p>
-                </div>
-              )}
+             {registrationResult && (
+               <div className="theme-card-secondary mt-5 rounded-2xl p-4">
+                 <p className="theme-subtle text-xs tracking-widest">
+                   REGISTRATION RESULT
+                 </p>
+             
+                 <p className="mt-2 font-bold">
+                   {registrationResult.vehicle.make} {registrationResult.vehicle.model}
+                 </p>
+             
+                 <p className="theme-muted mt-1 text-sm">
+                   Registration: {registrationResult.registration}
+                 </p>
+             
+                 <p className="theme-muted mt-1 text-sm">
+                   V-TAGged: {registrationResult.vtag.isTagged ? 'Yes' : 'No'}
+                 </p>
+             
+                 {registrationResult.vtag.referenceCode && (
+                   <p className="theme-muted mt-1 text-sm">
+                     V-TAG Reference: {registrationResult.vtag.referenceCode}
+                   </p>
+                 )}
+             
+                 <p className="theme-muted mt-1 text-sm">
+                   Latest MOT mileage: {registrationResult.mileage.latestMotMileage ?? 'Unknown'}
+                 </p>
+               
+                 <p className="theme-muted mt-1 text-sm">
+                   Estimated mileage: {registrationResult.mileage.estimatedMileage ?? 'Unknown'}
+                 </p>
+               
+                 <p className="mt-3 font-semibold">
+                   Latest MOT Status: {registrationResult.mot.latestStatus ?? 'Unknown'}
+                 </p>
+               </div>
+             )}
+             
+             {registrationError && (
+               <p className="mt-4 text-sm text-red-400">{registrationError}</p>
+             )}
             </div>
           </section>
         )}
