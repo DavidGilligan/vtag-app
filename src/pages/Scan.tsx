@@ -51,7 +51,7 @@ type VtagLookupResult = {
   }
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = 'https://vtag-backend-production.up.railway.app';
 
 const documentTypes = [
   { title: 'MOT Certificate', icon: <ClipboardList size={24} /> },
