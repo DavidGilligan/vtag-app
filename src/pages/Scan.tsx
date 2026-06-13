@@ -270,8 +270,16 @@ function Scan() {
 
     setActiveMode('vtag')
     setReferenceSearch(referenceFromUrl)
-    handleReferenceLookup(referenceFromUrl)
   }, [searchParams])
+
+  useEffect(() => {
+    const referenceFromUrl = searchParams.get('ref')
+    
+    if (!referenceFromUrl) return
+    
+    handleReferenceLookup(referenceFromUrl)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleRegistrationLookup() {
     if (!registrationSearch.trim()) return
