@@ -51,8 +51,7 @@ type VtagLookupResult = {
   }
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const documentTypes = [
   { title: 'MOT Certificate', icon: <ClipboardList size={24} /> },
@@ -282,7 +281,7 @@ function Scan() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/registration-lookup/${registrationSearch.trim()}`
+        `${API_URL}/registration-lookup/${registrationSearch.trim()}`
       )
 
       if (!response.ok) {
