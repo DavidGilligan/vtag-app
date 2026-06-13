@@ -306,7 +306,7 @@ function Scan() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/vtags/reference/${encodeURIComponent(reference)}`
+        `${API_URL}/vtags/reference/${encodeURIComponent(reference)}`
       )
 
       if (!response.ok) {
