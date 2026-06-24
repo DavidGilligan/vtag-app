@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CheckCircle, ShieldCheck, Wifi } from 'lucide-react'
+import { CheckCircle, ShieldCheck } from 'lucide-react'
+import dmSignal from '../assets/icons/dm_signal.svg'
 import hero from '../assets/hero.png'
 
 function VehicleCard() {
@@ -38,8 +39,12 @@ function VehicleCard() {
             className="block w-full object-cover"
           />
 
-          <div className="absolute right-4 top-4 rounded-full bg-black/70 p-3 text-white">
-            <Wifi size={18} />
+          <div className="absolute right-3 top-3 rounded-full bg-black/70 p-0.5">
+            <img
+              src={dmSignal}
+              alt="V-TAG Signal"
+              className="h-[36px] w-[36px] object-contain"
+            />
           </div>
         </div>
 

@@ -1,7 +1,8 @@
-import { Bell, Home, Menu, Moon, Sun, X } from 'lucide-react'
+import { Home, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import logo from '../assets/vtag-logo.png'
+import logo from '../assets/vtag-logo.svg'
+import Profile from '../assets/icons/dm_profile.svg'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -70,13 +71,17 @@ function Header() {
           onClick={() => setNotificationOpen(true)}
           className="theme-card rounded-full p-3 transition"
         >
-          <Bell size={22} />
+          <img
+            src={Profile}
+            alt="Profile"
+            className="h-6 w-6 object-contain scale-300"
+          />
         </button>
       </header>
 
       {menuOpen && isHomePage && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm">
-          <div className="theme-panel ml-auto h-full w-[82%] max-w-sm p-6 shadow-2xl">
+          <div className="theme-panel mr-auto h-full w-[82%] max-w-sm p-6 shadow-2xl">
             <div className="mb-8 flex items-center justify-between">
               <img
                 src={logo}
@@ -145,7 +150,7 @@ function Header() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="theme-subtle text-xs tracking-widest">
-                  NOTIFICATIONS
+                  PROILE SETTINGS
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold">

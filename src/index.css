@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'UKPlate';
+  src: url('/vtag-app/fonts/UKNumberPlate.ttf') format('truetype');
+}
+
+.reg-plate {
+  font-family: 'UKPlate';
+  letter-spacing: 2px;
+}
+
 * {
   box-sizing: border-box;
 }

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "railway:deploy": "npx prisma migrate deploy && npm run start:prod"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",
