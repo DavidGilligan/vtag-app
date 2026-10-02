@@ -2,7 +2,6 @@ import vehiclesell from '../assets/icons/dm_markets.svg'
 import parts from '../assets/icons/dm_parts.svg'
 import garages from '../assets/icons/dm_workshop.svg'
 import insurance from '../assets/icons/dm_insurance.svg'
-
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import AppShell from '../components/AppShell'

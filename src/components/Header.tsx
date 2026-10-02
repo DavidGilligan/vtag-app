@@ -12,7 +12,7 @@ function Header() {
   const [lightMode, setLightMode] = useState(false)
 
   const location = useLocation()
-  const isHomePage = location.pathname === '/'
+  const isHomePage = location.pathname === '/home'
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('vtag-theme')
@@ -56,7 +56,7 @@ function Header() {
             <Menu size={22} />
           </button>
         ) : (
-          <Link to="/" className="theme-card rounded-full p-3 transition">
+          <Link to="/home" className="theme-card rounded-full p-3 transition">
             <Home size={22} />
           </Link>
         )}
@@ -153,9 +153,7 @@ function Header() {
                   PROILE SETTINGS
                 </p>
 
-                <h2 className="mt-1 text-2xl font-bold">
-                  Notification Centre
-                </h2>
+                <h2 className="mt-1 text-2xl font-bold">Notification Centre</h2>
               </div>
 
               <button
@@ -187,9 +185,7 @@ function Header() {
       {phoneSettingsOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
           <div className="theme-card w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl">
-            <h2 className="text-xl font-bold">
-              Push Notification Settings
-            </h2>
+            <h2 className="text-xl font-bold">Push Notification Settings</h2>
 
             <p className="theme-muted mt-3 text-sm">
               This would normally take you to phone settings.

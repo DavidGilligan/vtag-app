@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @font-face {
   font-family: 'UKPlate';
@@ -115,4 +115,152 @@ html.light .theme-subtle {
 
 html.light .theme-border {
   border-color: #d4d4d8;
+}
+
+@keyframes vehicleDriveIn {
+  0% {
+    opacity: 0.15;
+    transform: scale(0.765);
+  }
+
+  15% {
+    opacity: 0.22;
+    transform: scale(0.8);
+  }
+
+  30% {
+    opacity: 0.38;
+    transform: scale(0.84);
+  }
+
+  42% {
+    opacity: 0.58;
+    transform: scale(0.87);
+  }
+
+  52% {
+    opacity: 0.76;
+    transform: scale(0.886);
+  }
+
+  60% {
+    opacity: 0.88;
+    transform: scale(0.894);
+  }
+
+  68% {
+    opacity: 0.94;
+    transform: scale(0.898);
+  }
+
+  /* Shadow clears - almost all forward movement is now complete */
+  75% {
+    opacity: 0.97;
+    transform: scale(0.8992);
+  }
+
+  /* Tiny rolling/braking movement remains */
+  82% {
+    opacity: 0.982;
+    transform: scale(0.89955);
+  }
+
+  88% {
+    opacity: 0.99;
+    transform: scale(0.89975);
+  }
+
+  93% {
+    opacity: 0.995;
+    transform: scale(0.89987);
+  }
+
+  97% {
+    opacity: 0.998;
+    transform: scale(0.89995);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+}
+
+.vehicle-drive-in {
+  animation: vehicleDriveIn 2.25s linear both;
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.vehicle-light-reveal {
+  position: absolute;
+  inset: -150% -50%;
+
+  background:
+    /* Darken the outer sides */
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.65) 0%,
+      rgba(0, 0, 0, 0.38) 18%,
+      rgba(0, 0, 0, 0.1) 32%,
+      transparent 42%,
+      transparent 58%,
+      rgba(0, 0, 0, 0.1) 68%,
+      rgba(0, 0, 0, 0.38) 82%,
+      rgba(0, 0, 0, 0.65) 100%
+    ),
+    /* Existing moving bell / arch */
+    radial-gradient(
+        ellipse 55% 45% at 50% 100%,
+        transparent 0%,
+        transparent 62%,
+        rgba(0, 0, 0, 0.32) 64.5%,
+        rgba(0, 0, 0, 0.65) 67%,
+        rgba(0, 0, 0, 0.88) 70.5%
+      );
+
+  animation: vehicleLightReveal 2.5s linear both;
+  will-change: transform, opacity;
+}
+
+@keyframes vehicleLightReveal {
+  0% {
+    transform: translateY(30%);
+    opacity: 1;
+  }
+
+  40% {
+    opacity: 0.9;
+  }
+
+  65% {
+    opacity: 0.45;
+  }
+
+  80% {
+    opacity: 0.15;
+  }
+
+  92% {
+    opacity: 0.02;
+  }
+
+  100% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+}
+
+.vehicle-motion-blur {
+  overflow: hidden;
+
+  /* Only show bottom 13% */
+  clip-path: inset(87% 0 0 0);
+
+  opacity: 0.8;
+
+  animation: vehicleMotionBlur 2.5s linear both;
+
+  will-change: opacity;
 }

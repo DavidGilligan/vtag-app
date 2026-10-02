@@ -1,15 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   Bell,
-  Car,
+  CalendarDays,
+  ChevronRight,
   CircleHelp,
+  Clock,
   Contact,
+  Download,
+  Eye,
+  FileText,
+  Fingerprint,
+  Globe,
   Lock,
-  Moon,
+  Megaphone,
+  MessageSquare,
+  Monitor,
+  Palette,
   RefreshCcw,
-  Settings as SettingsIcon,
+  ShieldCheck,
+  Smartphone,
   SmartphoneNfc,
-  Sun,
   Trash2,
   User,
   Wifi,
@@ -18,35 +28,79 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import AppShell from '../components/AppShell'
 
-function Settings() {
-  const [lightMode, setLightMode] = useState(false)
-  const [fontSize, setFontSize] = useState<'S' | 'M' | 'L'>('M')
-  const [connectionPopup, setConnectionPopup] = useState(false)
-  const [notificationsPopup, setNotificationsPopup] = useState(false)
+type ThemeMode = 'light' | 'dark' | 'purple' | 'novel'
+type FontSize = 'S' | 'M' | 'L'
 
-  const [showMileage, setShowMileage] = useState(true)
-  const [showModifications, setShowModifications] = useState(true)
-  const [showReference, setShowReference] = useState(false)
+type ToggleState = {
+  notifications: boolean
+  vehicleAlerts: boolean
+  motReminders: boolean
+  taxReminders: boolean
+  insuranceReminders: boolean
+  softwareUpdates: boolean
+  marketingNotifications: boolean
+  offlineMode: boolean
+  analyticsDiagnostics: boolean
+  crashReports: boolean
+  useSystemTheme: boolean
+  highContrast: boolean
+  reduceAnimations: boolean
+}
+
+function Settings() {
+  const [theme, setTheme] = useState<ThemeMode>('dark')
+  const [fontSize, setFontSize] = useState<FontSize>('M')
+  const [toggles, setToggles] = useState<ToggleState>({
+    notifications: true,
+    vehicleAlerts: true,
+    motReminders: true,
+    taxReminders: true,
+    insuranceReminders: true,
+    softwareUpdates: true,
+    marketingNotifications: false,
+    offlineMode: false,
+    analyticsDiagnostics: true,
+    crashReports: true,
+    useSystemTheme: false,
+    highContrast: false,
+    reduceAnimations: false,
+  })
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('vtag-theme')
+    const savedTheme = localStorage.getItem('vtag-theme') as ThemeMode | null
+    const savedFontSize = localStorage.getItem('vtag-font-size') as FontSize | null
 
-    if (savedTheme === 'light') {
-      setLightMode(true)
+    if (savedTheme) {
+      setTheme(savedTheme)
+      applyTheme(savedTheme)
+    }
+
+    if (savedFontSize) {
+      setFontSize(savedFontSize)
     }
   }, [])
 
-  function toggleTheme() {
-    const nextMode = !lightMode
-    setLightMode(nextMode)
+  function applyTheme(nextTheme: ThemeMode) {
+    document.documentElement.classList.remove('light', 'dark', 'purple', 'novel')
+    document.documentElement.classList.add(nextTheme)
+    localStorage.setItem('vtag-theme', nextTheme)
+  }
 
-    if (nextMode) {
-      document.documentElement.classList.add('light')
-      localStorage.setItem('vtag-theme', 'light')
-    } else {
-      document.documentElement.classList.remove('light')
-      localStorage.setItem('vtag-theme', 'dark')
-    }
+  function handleThemeChange(nextTheme: ThemeMode) {
+    setTheme(nextTheme)
+    applyTheme(nextTheme)
+  }
+
+  function handleFontSizeChange(nextFontSize: FontSize) {
+    setFontSize(nextFontSize)
+    localStorage.setItem('vtag-font-size', nextFontSize)
+  }
+
+  function toggleSetting(setting: keyof ToggleState) {
+    setToggles((current) => ({
+      ...current,
+      [setting]: !current[setting],
+    }))
   }
 
   return (
@@ -56,141 +110,214 @@ function Settings() {
 
         <section className="px-5 pt-6">
           <p className="theme-subtle text-xs tracking-widest">SETTINGS</p>
-          <h1 className="mt-1 text-3xl font-bold">APP SETTINGS</h1>
+          <h1 className="mt-1 text-3xl font-bold">Profile Settings</h1>
           <p className="theme-muted mt-2 text-sm">
-            Manage your V-TAG, vehicle, account and display preferences.
+            Manage your account, app preferences, display options and V-TAG setup.
           </p>
         </section>
 
         <section className="mt-6 space-y-5 px-5">
-          <SettingsSection title="V-Tag Settings" icon={<SmartphoneNfc size={20} />}>
-            <button
-              onClick={() => setConnectionPopup(true)}
-              className="theme-card-secondary w-full rounded-2xl p-4 text-left font-semibold"
-            >
-              Check for connection
-            </button>
+          <SettingsSection title="User Settings" icon={<User size={20} />}>
+            <SettingsTile
+              icon={<ShieldCheck size={20} />}
+              title="Profile"
+              note="Protected behind verification"
+              protectedItem
+            />
+            <SettingsTile title="Username" note="Change username" />
+            <SettingsTile title="Email Address" note="Change email" />
+            <SettingsTile title="Full Name" note="Edit name" />
+            <SettingsTile title="Date of Birth" note="View/Edit DOB" />
+            <SettingsTile icon={<Lock size={20} />} title="Change Password" note="Update password" />
+            <SettingsTile
+              icon={<Trash2 size={20} />}
+              title="Delete Account"
+              note="Permanently delete account"
+              danger
+            />
+            <SettingsTile
+              icon={<ShieldCheck size={20} />}
+              title="Two-Factor Authentication"
+              note="Additional account security"
+            />
+            <SettingsTile
+              icon={<Fingerprint size={20} />}
+              title="Biometric Login"
+              note="Face ID / Fingerprint login"
+            />
+            <SettingsTile
+              icon={<Smartphone size={20} />}
+              title="Active Devices"
+              note="View and remove logged-in devices"
+            />
+            <SettingsTile icon={<Download size={20} />} title="Download My Data" note="GDPR data export" />
+            <SettingsTile icon={<Globe size={20} />} title="Language" note="Change app language" />
+            <SettingsTile title="Region" note="UK, US, EU etc." />
+            <SettingsTile title="Preferred Units" note="Miles/Kilometres, MPG/L/100km" />
+            <SettingsTile icon={<CalendarDays size={20} />} title="Date Format" note="DD/MM/YYYY etc." />
           </SettingsSection>
 
-          <SettingsSection title="App Settings" icon={<SettingsIcon size={20} />}>
+          <SettingsSection title="Appearance" icon={<Palette size={20} />}>
             <div className="theme-card-secondary rounded-2xl p-4">
-              <p className="font-semibold">Display Settings</p>
+              <p className="font-semibold">Theme</p>
+              <p className="theme-muted mt-1 text-xs">Light, Dark, Purple or Novel</p>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold">Preferred Mode</p>
-                  <p className="theme-muted text-xs">Light / Dark</p>
-                </div>
-
-                <button
-                  onClick={toggleTheme}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
-                    lightMode ? 'bg-[#050606] text-white' : 'bg-white text-black'
-                  }`}
-                >
-                  {lightMode ? <Moon size={16} /> : <Sun size={16} />}
-                  {lightMode ? 'Dark' : 'Light'}
-                </button>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-sm font-semibold">Font Size</p>
-
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {(['S', 'M', 'L'] as const).map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setFontSize(size)}
-                      className={`rounded-xl py-3 font-bold ${
-                        fontSize === size
-                          ? 'bg-green-900/30 text-green-400'
-                          : 'theme-card'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {(['light', 'dark', 'purple', 'novel'] as const).map((themeOption) => (
+                  <button
+                    key={themeOption}
+                    onClick={() => handleThemeChange(themeOption)}
+                    className={`rounded-xl py-3 text-sm font-bold capitalize ${
+                      theme === themeOption ? 'bg-green-900/30 text-green-400' : 'theme-card'
+                    }`}
+                  >
+                    {themeOption}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <button
-              onClick={() => setNotificationsPopup(true)}
-              className="theme-card-secondary flex w-full items-center gap-3 rounded-2xl p-4 text-left font-semibold"
-            >
-              <Bell size={20} />
-              Notification Centre
-            </button>
+            <div className="theme-card-secondary rounded-2xl p-4">
+              <p className="font-semibold">Font Size</p>
+              <p className="theme-muted mt-1 text-xs">Small / Medium / Large</p>
 
-            <SettingsTile icon={<Wifi size={20} />} title="WiFi / Cellular Usage" />
-            <SettingsTile icon={<RefreshCcw size={20} />} title="Reset to default settings" />
-          </SettingsSection>
-
-          <SettingsSection title="Profile Settings" icon={<User size={20} />}>
-            <TextField label="Username" value="DaGilDad1235i" />
-            <TextField label="Email" value="David.Gilligan1997@gmail.com" />
-            <TextField label="Name" value="David Gilligan" />
-            <TextField label="DOB" value="28/08/1997" />
-
-            <SettingsTile icon={<Lock size={20} />} title="Reset Password" />
-            <SettingsTile icon={<Trash2 size={20} />} title="Delete Account" danger />
-          </SettingsSection>
-
-          <SettingsSection title="Show Mode" icon={<Car size={20} />}>
-            <ToggleTile
-              title="Show mileage history"
-              enabled={showMileage}
-              onClick={() => setShowMileage(!showMileage)}
-            />
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {(['S', 'M', 'L'] as const).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handleFontSizeChange(size)}
+                    className={`rounded-xl py-3 font-bold ${
+                      fontSize === size ? 'bg-green-900/30 text-green-400' : 'theme-card'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <ToggleTile
-              title="Show modifications"
-              enabled={showModifications}
-              onClick={() => setShowModifications(!showModifications)}
+              icon={<Monitor size={20} />}
+              title="Use System Theme"
+              note="Optional"
+              enabled={toggles.useSystemTheme}
+              onClick={() => toggleSetting('useSystemTheme')}
             />
-
             <ToggleTile
-              title="Show V-Tag reference"
-              enabled={showReference}
-              onClick={() => setShowReference(!showReference)}
+              icon={<Eye size={20} />}
+              title="High Contrast"
+              note="Optional"
+              enabled={toggles.highContrast}
+              onClick={() => toggleSetting('highContrast')}
+            />
+            <ToggleTile
+              title="Reduce Animations"
+              note="Optional"
+              enabled={toggles.reduceAnimations}
+              onClick={() => toggleSetting('reduceAnimations')}
             />
           </SettingsSection>
 
-          <SettingsSection title="My Fleet" icon={<Car size={20} />}>
-            <SettingsTile title="Remove Vehicle" danger />
-            <SettingsTile title="Adjust Vehicle" />
-            <SettingsTile title="Request Vehicle Record Amendment" />
+          <SettingsSection title="App Preferences" icon={<Bell size={20} />}>
+            <ToggleTile
+              icon={<Bell size={20} />}
+              title="Notifications"
+              note="Master notification switch"
+              enabled={toggles.notifications}
+              onClick={() => toggleSetting('notifications')}
+            />
+            <SettingsTile icon={<Clock size={20} />} title="Quiet Hours" note="Silence notifications overnight" />
+            <SettingsTile title="Reminder Frequency" note="Daily / Weekly / Monthly" />
+            <ToggleTile
+              title="Vehicle Alerts"
+              note="On/Off"
+              enabled={toggles.vehicleAlerts}
+              onClick={() => toggleSetting('vehicleAlerts')}
+            />
+            <ToggleTile
+              title="MOT Reminders"
+              note="On/Off"
+              enabled={toggles.motReminders}
+              onClick={() => toggleSetting('motReminders')}
+            />
+            <ToggleTile
+              title="Tax Reminders"
+              note="On/Off"
+              enabled={toggles.taxReminders}
+              onClick={() => toggleSetting('taxReminders')}
+            />
+            <ToggleTile
+              title="Insurance Reminders"
+              note="On/Off"
+              enabled={toggles.insuranceReminders}
+              onClick={() => toggleSetting('insuranceReminders')}
+            />
+            <ToggleTile
+              title="Software Updates/New Features"
+              note="On/Off"
+              enabled={toggles.softwareUpdates}
+              onClick={() => toggleSetting('softwareUpdates')}
+            />
+            <ToggleTile
+              icon={<Megaphone size={20} />}
+              title="Marketing Notifications"
+              note="On/Off"
+              enabled={toggles.marketingNotifications}
+              onClick={() => toggleSetting('marketingNotifications')}
+            />
+            <ToggleTile
+              title="Offline Mode"
+              note="Store data locally"
+              enabled={toggles.offlineMode}
+              onClick={() => toggleSetting('offlineMode')}
+            />
+            <SettingsTile icon={<Wifi size={20} />} title="Wi-Fi & Cellular Usage" note="Control data usage" />
+            <ToggleTile
+              title="Analytics & Diagnostics"
+              note="On/Off"
+              enabled={toggles.analyticsDiagnostics}
+              onClick={() => toggleSetting('analyticsDiagnostics')}
+            />
+            <ToggleTile
+              title="Crash Reports"
+              note="On/Off"
+              enabled={toggles.crashReports}
+              onClick={() => toggleSetting('crashReports')}
+            />
+            <SettingsTile
+              icon={<RefreshCcw size={20} />}
+              title="Reset App Settings"
+              note="Restore defaults"
+              danger
+            />
           </SettingsSection>
 
-          <SettingsSection title="Help" icon={<CircleHelp size={20} />}>
-            <SettingsTile icon={<CircleHelp size={20} />} title="FAQs" />
-            <SettingsTile icon={<Contact size={20} />} title="Contact Us" />
+          <SettingsSection title="V-TAG Settings" icon={<SmartphoneNfc size={20} />}>
+            <SettingsTile
+              icon={<SmartphoneNfc size={20} />}
+              title="Pair New V-TAG"
+              note="Connect another V-TAG"
+            />
+          </SettingsSection>
+
+          <SettingsSection title="Help & Support" icon={<CircleHelp size={20} />}>
+            <SettingsTile icon={<CircleHelp size={20} />} title="FAQs" note="Frequently asked questions" />
+            <SettingsTile icon={<Contact size={20} />} title="Contact Us" note="Contact support" />
+            <SettingsTile
+              icon={<MessageSquare size={20} />}
+              title="Submit Feedback"
+              note="Submit feature requests"
+            />
+            <SettingsTile title="Report a Problem" note="Submit bug report" />
+            <SettingsTile icon={<FileText size={20} />} title="Privacy Policy" note="View policy" />
+            <SettingsTile icon={<FileText size={20} />} title="Terms & Conditions" note="View terms" />
+            <SettingsTile title="App Version" note="Version number" />
           </SettingsSection>
 
           <button className="w-full rounded-2xl bg-red-900/30 p-4 text-left font-bold text-red-400">
             Sign Out
           </button>
         </section>
-
-        {connectionPopup && (
-          <Popup title="Check V-Tag Connection" onClose={() => setConnectionPopup(false)}>
-            <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-green-900/30 text-green-400">
-              <SmartphoneNfc size={48} />
-            </div>
-
-            <p className="theme-muted text-center text-sm">
-              Hold the top of your phone against the V-TAG case to check the connection.
-            </p>
-          </Popup>
-        )}
-
-        {notificationsPopup && (
-          <Popup title="Notification Centre" onClose={() => setNotificationsPopup(false)}>
-            <p className="theme-muted text-sm">
-              This would open the shared notification centre from the bell icon.
-            </p>
-          </Popup>
-        )}
 
         <BottomNav />
       </main>
@@ -200,113 +327,107 @@ function Settings() {
 
 type SettingsSectionProps = {
   title: string
-  icon: React.ReactNode
-  children: React.ReactNode
+  icon: ReactNode
+  children: ReactNode
 }
 
 function SettingsSection({ title, icon, children }: SettingsSectionProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
     <section className="theme-card rounded-3xl p-5">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="theme-card-secondary rounded-xl p-3">
-          {icon}
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <span className="flex items-center gap-3">
+          <span className="theme-card-secondary rounded-xl p-3">{icon}</span>
+          <span className="text-lg font-bold">{title}</span>
+        </span>
+
+        <ChevronRight
+          size={22}
+          className={`theme-muted transition-transform ${
+            isOpen ? 'rotate-90' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="mt-4 space-y-3">
+          {children}
         </div>
-
-        <h2 className="text-lg font-bold">{title}</h2>
-      </div>
-
-      <div className="space-y-3">{children}</div>
+      )}
     </section>
   )
 }
 
 type SettingsTileProps = {
   title: string
-  icon?: React.ReactNode
+  note?: string
+  icon?: ReactNode
   danger?: boolean
+  protectedItem?: boolean
 }
 
-function SettingsTile({ title, icon, danger }: SettingsTileProps) {
+function SettingsTile({ title, note, icon, danger, protectedItem }: SettingsTileProps) {
   return (
     <button
-      className={`theme-card-secondary flex w-full items-center gap-3 rounded-2xl p-4 text-left font-semibold ${
+      className={`theme-card-secondary flex w-full items-center justify-between gap-3 rounded-2xl p-4 text-left font-semibold ${
         danger ? 'text-red-400' : ''
       }`}
     >
-      {icon}
-      {title}
-    </button>
-  )
-}
+      <span className="flex items-center gap-3">
+        {icon}
+        <span>
+          <span className="block">{title}</span>
+          {note && <span className="theme-muted mt-1 block text-xs font-normal">{note}</span>}
+        </span>
+      </span>
 
-type TextFieldProps = {
-  label: string
-  value: string
-}
-
-function TextField({ label, value }: TextFieldProps) {
-  return (
-    <label className="theme-card-secondary block rounded-2xl p-4">
-      <p className="theme-subtle text-xs tracking-widest">{label}</p>
-
-      <input
-        value={value}
-        readOnly
-        className="mt-2 w-full bg-transparent font-semibold outline-none"
-      />
-    </label>
-  )
-}
-
-type ToggleTileProps = {
-  title: string
-  enabled: boolean
-  onClick: () => void
-}
-
-function ToggleTile({ title, enabled, onClick }: ToggleTileProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="theme-card-secondary flex w-full items-center justify-between rounded-2xl p-4 text-left font-semibold"
-    >
-      <span>{title}</span>
-
-      <span
-        className={`rounded-full px-3 py-1 text-xs font-bold ${
-          enabled
-            ? 'bg-green-900/30 text-green-400'
-            : 'bg-red-900/30 text-red-400'
-        }`}
-      >
-        {enabled ? 'ON' : 'OFF'}
+      <span className="flex items-center gap-2">
+        {protectedItem && (
+          <span className="rounded-full bg-green-900/30 px-3 py-1 text-xs font-bold text-green-400">
+            VERIFY
+          </span>
+        )}
+        <ChevronRight size={18} className="theme-muted" />
       </span>
     </button>
   )
 }
 
-type PopupProps = {
+type ToggleTileProps = {
   title: string
-  children: React.ReactNode
-  onClose: () => void
+  note?: string
+  icon?: ReactNode
+  enabled: boolean
+  onClick: () => void
 }
 
-function Popup({ title, children, onClose }: PopupProps) {
+function ToggleTile({ title, note, icon, enabled, onClick }: ToggleTileProps) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
-      <div className="theme-card w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-        <h2 className="text-center text-2xl font-bold">{title}</h2>
+    <button
+      onClick={onClick}
+      className="theme-card-secondary flex w-full items-center justify-between gap-3 rounded-2xl p-4 text-left font-semibold"
+    >
+      <span className="flex items-center gap-3">
+        {icon}
+        <span>
+          <span className="block">{title}</span>
+          {note && <span className="theme-muted mt-1 block text-xs font-normal">{note}</span>}
+        </span>
+      </span>
 
-        <div className="mt-5">{children}</div>
-
-        <button
-          onClick={onClose}
-          className="mt-6 w-full rounded-2xl bg-white py-3 font-bold text-black"
-        >
-          Done
-        </button>
-      </div>
-    </div>
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-bold ${
+          enabled ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+        }`}
+      >
+        {enabled ? 'ON' : 'OFF'}
+      </span>
+    </button>
   )
 }
 

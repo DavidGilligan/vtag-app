@@ -8,21 +8,28 @@ type FeatureCardProps = {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <button className="theme-card w-full rounded-2xl p-4 text-left transition">
-      <div className="flex items-center gap-4">
-        <div className="theme-card-secondary rounded-xl p-3">
-          {icon}
-        </div>
+    <button
+      className="
+        theme-card
+        flex h-full min-h-[190px] w-full
+        flex-col items-center
+        rounded-2xl
+        px-4 py-4
+        text-center
+        transition
+        active:scale-[0.98]
+      "
+    >
+      {/* Large icon area */}
+      <div className="flex min-h-0 flex-1 items-center justify-center">
+        {icon}
+      </div>
 
-        <div>
-          <h3 className="font-semibold">
-            {title}
-          </h3>
+      {/* Text */}
+      <div className="shrink-0 pb-1">
+        <h3 className="text-base font-semibold leading-tight">{title}</h3>
 
-          <p className="theme-muted mt-1 text-sm">
-            {description}
-          </p>
-        </div>
+        <p className="theme-muted mt-1.5 text-sm leading-snug">{description}</p>
       </div>
     </button>
   )
