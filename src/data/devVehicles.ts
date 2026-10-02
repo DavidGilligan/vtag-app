@@ -81,7 +81,7 @@ export const devVehicles: Vehicle[] = [
       value: 49605,
     },
     year: 1971,
-    vehicleType: 'classic',
+    vehicleType: 'car',
     verificationStatus: 'verified',
     images: {
       garage: hillhero,

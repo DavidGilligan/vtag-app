@@ -105,10 +105,6 @@ function MotHistory() {
     (record) => record.status === 'PASS',
   ).length
 
-  const failedTests = motRecords.filter(
-    (record) => record.status === 'FAIL',
-  ).length
-
   const verifiedTests = motRecords.filter(
     (record) => record.verificationStatus === 'verified',
   ).length

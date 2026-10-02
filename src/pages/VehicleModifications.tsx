@@ -9,7 +9,6 @@ import {
   Settings,
   Store,
   UserRound,
-  Wrench,
 } from 'lucide-react'
 
 import Header from '../components/Header'

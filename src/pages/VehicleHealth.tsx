@@ -46,14 +46,16 @@ function VehicleHealth() {
 
   const vehicleName = `${selectedVehicle.make} ${selectedVehicle.model}`
 
-  function formatUsage() {
-    if (!selectedVehicle.usage) {
+  const currentUsage = (() => {
+    const usage = selectedVehicle.usage
+
+    if (!usage) {
       return 'Not recorded'
     }
 
-    const value = selectedVehicle.usage.value.toLocaleString('en-GB')
+    const value = usage.value.toLocaleString('en-GB')
 
-    switch (selectedVehicle.usage.type) {
+    switch (usage.type) {
       case 'mileage':
         return `${value} mi`
 
@@ -66,7 +68,7 @@ function VehicleHealth() {
       default:
         return value
     }
-  }
+  })()
 
   return (
     <AppShell>
@@ -120,7 +122,7 @@ function VehicleHealth() {
 
             <div className="mt-5 border-t border-white/10 pt-4">
               <div className="grid grid-cols-2 gap-5">
-                <SummaryValue label="Current Mileage" value={formatUsage()} />
+                <SummaryValue label="Current Mileage" value={currentUsage} />
 
                 <SummaryValue label="Latest MOT" value="PASS" />
 
@@ -176,7 +178,7 @@ function VehicleHealth() {
               icon={<ShieldCheck size={25} strokeWidth={1.6} />}
               title="Warranty"
               description="Vehicle cover and warranty history"
-              to="/vehicle-identity/health/warranty"
+              to="/vehicle-identity/warranty"
             />
           </div>
         </section>

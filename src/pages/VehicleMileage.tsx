@@ -43,14 +43,16 @@ function VehicleMileage() {
 
   const vehicleName = `${selectedVehicle.make} ${selectedVehicle.model}`
 
-  function formatCurrentUsage() {
-    if (!selectedVehicle.usage) {
+  const usage = selectedVehicle.usage
+
+  const currentUsage = (() => {
+    if (!usage) {
       return 'Not recorded'
     }
 
-    const value = selectedVehicle.usage.value.toLocaleString('en-GB')
+    const value = usage.value.toLocaleString('en-GB')
 
-    switch (selectedVehicle.usage.type) {
+    switch (usage.type) {
       case 'mileage':
         return `${value} mi`
 
@@ -63,9 +65,9 @@ function VehicleMileage() {
       default:
         return value
     }
-  }
+  })()
 
-  const isMileageVehicle = selectedVehicle.usage?.type === 'mileage'
+  const isMileageVehicle = usage?.type === 'mileage'
 
   return (
     <AppShell>
@@ -103,9 +105,7 @@ function VehicleMileage() {
                   CURRENT MILEAGE
                 </p>
 
-                <p className="mt-1 text-3xl font-bold">
-                  {formatCurrentUsage()}
-                </p>
+                <p className="mt-1 text-3xl font-bold">{currentUsage}</p>
 
                 <p className="theme-muted mt-2 text-xs">
                   Latest recorded vehicle usage

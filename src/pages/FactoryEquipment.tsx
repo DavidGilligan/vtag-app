@@ -5,12 +5,10 @@ import {
   ChevronDown,
   ChevronUp,
   CircleGauge,
-  Lightbulb,
   Search,
   ShieldCheck,
   Speaker,
   Smartphone,
-  Snowflake,
   Sparkles,
 } from 'lucide-react'
 
